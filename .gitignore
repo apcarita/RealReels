@@ -1,0 +1,61 @@
+.env
+client_secret.json
+Google.json
+Generated/
+script_name-oauth2.json
+.session.dat
+downloads/
+Logs/
+playwright/
+venv/
+*.pyc
+*.pyo
+__pycache__/
+*.log
+.tox/
+.nox/
+build/
+dist/
+*.egg-info/
+*.egg
+htmlcov/
+.coverage
+.ipynb_checkpoints/
+venv/Generated/
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+
+# OS generated files #
+######################
+.DS_Store
+Thumbs.db
+
+# Virtual Environment #
+#######################
+venv/
+
+*.json
+client_secrets.json
