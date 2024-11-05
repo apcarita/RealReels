@@ -24,8 +24,12 @@ def detect_safe_search(path):
         "VERY_LIKELY",
     )
     print("Safe search:")
-
-    print(f"adult: {likelihood_name[safe.adult]}")
+    adult = likelihood_name[safe.adult]
+    print(f"adult: {adult}")
+    if(adult == "VERY_LIKELY" or adult == "LIKELY" or adult == "POSSIBLE"):
+        print("Adult content detected. Skipping...")
+        return True
+    return False
     #print(f"medical: {likelihood_name[safe.medical]}")
     #print(f"spoofed: {likelihood_name[safe.spoof]}")
     #print(f"violence: {likelihood_name[safe.violence]}")
@@ -45,5 +49,5 @@ def process_folder(folder_path):
             detect_safe_search(file_path)
 
 if __name__ == "__main__":
-    folder_path = "Generated/images/Genisis 2:[9-11]"
-    process_folder(folder_path)
+    folder_path = "/Users/adam/Documents/COde/RelReels/Generated_Genesis/images/Genesis 3:[13-15]/generate_19.jpg"
+    detect_safe_search(folder_path)

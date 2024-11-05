@@ -7,8 +7,19 @@ from openai import OpenAI
 
 def log(book):
     current_time = datetime.datetime.now()
+
+    log_dir = f'Logs/{book}'
+    os.makedirs(log_dir, exist_ok=True)
+
     # Reading
     print(f"loading logs for Logs/{book}/Chapter.pkl")
+    if not os.path.exists(f'Logs/{book}/Chapter.pkl'):
+        with open(f'Logs/{book}/Chapter.pkl', 'wb') as f:
+            pickle.dump(1, f)
+        with open(f'Logs/{book}/Part.pkl', 'wb') as f:
+            pickle.dump(1, f)
+        with open(f'Logs/{book}Upload_Queue.pkl', 'wb') as f:
+            pickle.dump(1, f)
     with open(f'Logs/{book}/Chapter.pkl', 'rb') as f:
         chapter = pickle.load(f)
     
@@ -23,7 +34,10 @@ def log(book):
     return chapter, line
 
 def findHowManyLines(book, chapter, line, max_words):
-    lines, _ = getChapter(book, chapter)
+    if(book == "Genesis"):
+        lines, _ = getChapter(book, chapter)
+    else:
+        lines, _ = getChapterBook(book, chapter)
     #print(f"Lines from chapter {chapter}:{line}")
     selected_lines = []
     total_words = 0
@@ -39,6 +53,8 @@ def findHowManyLines(book, chapter, line, max_words):
     for i in range(line - 1, len(lines)):
         words_in_line = len(lines[i].split())
         chars_in_line = len(lines[i])
+        if lines[i].strip().startswith("Chapter") or lines[i].strip() == "":
+            continue
         if (total_words + words_in_line > max_words) or (total_chars + chars_in_line > 900):
             if not selected_lines:
                 selected_lines.append(lines[i])
@@ -60,46 +76,6 @@ def findHowManyLines(book, chapter, line, max_words):
         print("last Line number: ", last_line_number)
 
     return selected_lines, last_line_number, nchapter
-
-def findHowManyLinesBook(book, chapter, line, max_words):
-    lines, _ = getChapterBook(book, chapter)
-    #print(f"Lines from chapter {chapter}:{line}")
-    selected_lines = []
-    total_words = 0
-    total_chars = 0
-    last_line_number = line
-    nchapter = chapter
-    print(len(lines))
-    if(line >= len(lines)):
-        nchapter = chapter + 1
-        lines, _ = getChapterBook(book, nchapter)
-        line = 1
-        print("line does not exist; next chapter")
-    for i in range(line - 1, len(lines)):
-        words_in_line = len(lines[i].split())
-        chars_in_line = len(lines[i])
-        if (total_words + words_in_line > max_words) or (total_chars + chars_in_line > 900):
-            if not selected_lines:
-                selected_lines.append(lines[i])
-                last_line_number = i + 1
-            break
-        if(i >= len(lines)):
-            selected_lines.append(lines[i])
-            nchapter = chapter + 1
-            lines, _ = getChapterBook(book, nchapter)
-            i = 0
-            line = 1
-            break
-        print(f"adding line {i+1}: {lines[i]}")
-        selected_lines.append(lines[i])
-        total_words += words_in_line
-        total_chars += chars_in_line
-        last_line_number = i + 2
-
-        print("last Line number: ", last_line_number)
-
-    return selected_lines, last_line_number, nchapter
-
 
 def logComplete(book, chapter, text, startline, lastline, output_path):
      # Writing
@@ -212,23 +188,26 @@ def describe(text):
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {   "role": "user",
-                "content": f"Describe the following bible verse in detail in LESS THAN 400 character or 50 words. get right into the description, avoid starting with an intro, and DO NOT INCLUDE NAKED PEOPLE, say they are covered in leaves. avoid names Adam and Eve {text}"}
+                "content": f"breifly descripe the setting, and then secene in detail. When describing people alway describe thier outfit before them (ex: wearing a green dress, a women). Whenever somone is naked, say they are covered in before describing them. USE LESS THAN 400 characters {text}"}
         ]
     )
-    description = completion.choices[0].message.content
+    description = ' '.join(completion.choices[0].message.content.split()[:50])
     print(description)
 
 
     return description
 if __name__ == "__main__":
-    RemoveUploadQueue("Genesis")
-    #print(getChapterBook("A Court Of Thorns.txt", 1))
+    #RemoveUploadQueue("Genesis")
+    #print(getChapterBook("Frosty", 1))
+    book = "Genesis"
+    logComplete(book, 3,"sdad", 10, 13, "output_path")
+    #RemoveUploadQueue("Genesis")
 
 
-    #text = findHowManyLines("Genisis", 2, 24, 100)
+    text = findHowManyLines("Genesis", 13, 1, 95)
 
-    #print(text)
-    #describe(text)
+    #print(describe(" Once upon a snowy morning in the cozy town of Evergreen Hills, a group of children rushed outside, eager to build their annual snowman. The air was crisp, and the ground was blanketed with fresh, powdery snow—the perfect day for snowman building. The children worked together, rolling the snow into three large, round balls, stacking them one on top of the other. Soon, they had built a snowman that was the envy of the neighborhood. They named him Frosty, and he had a carrot nose, coal eyes, and a big, friendly smile. "))
+   # describe(text)
 
     #test()
     #describe(findHowManyLines("Genisis", 1, 1, 100)[0])

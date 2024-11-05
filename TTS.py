@@ -29,26 +29,26 @@ def speak(text, output_path):
 
     response.stream_to_file(output_path)
     return output_path
-def epensiveSpeak(text, output_path):
+def epensiveSpeak(text, output_path, voice):
     load_dotenv()
     api_key = os.getenv('ELEVEN_API_KEY')
     client = ElevenLabs(api_key=api_key)
     audio = client.generate(
         text=text,
-        voice="Daniel",
+        voice=voice,
         model="eleven_multilingual_v2"
     )
 
     save(audio, output_path)
 
     return output_path
-def makeAudio(lines, output_path, pause_length):
+def makeAudio(lines, output_path, pause_length, voice):
     print("Starting makeAudio function")
     silence = AudioFileClip("Logs/silence.mp3").subclip(0, pause_length)
     audio_paths = []
     for i, line in enumerate(lines):
         print(f"Processing line {i}: {line}")
-        audio_path = epensiveSpeak(line, f"temp/temp{i}.mp3")
+        audio_path = epensiveSpeak(line, f"temp/temp{i}.mp3", voice)
         print(f"Generated audio for line {i} at {audio_path}")
         audio_paths.append(AudioFileClip(audio_path))
         audio_paths.append(silence)

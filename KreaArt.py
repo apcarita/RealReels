@@ -9,6 +9,7 @@ import string
 import logging
 from dotenv import load_dotenv
 import json
+from SafeSearch import detect_safe_search
 
 logging.basicConfig(level=30)
 
@@ -77,7 +78,7 @@ async def fetchArt(line, chars_per_line, output_path):
     await tab.scroll_down(20)
     image_count = 1
     for i in range(0, len(text), chars_per_line):
-        if(i == 0):
+        if(i <= 1):
             snippet = text[i:i+chars_per_line]
             await text_area.send_keys(snippet)
             await tab.sleep(2)
@@ -92,6 +93,9 @@ async def fetchArt(line, chars_per_line, output_path):
         print(f"typing: {snippet}... Saving to: {path}")
         await image_area.save_screenshot(path)
         #await tab.download_file(img_url, path)
+        if(image_count <= 3):
+            if(detect_safe_search(path) ):
+                return 0
         images.append(path)
         image_count += 1
     # Move all the image files from downloads to output_path

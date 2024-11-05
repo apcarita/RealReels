@@ -13,24 +13,24 @@ max_chars_per_line = 80
 
 def main():
     hashtags = ['#faith', '#religion', '#spirituality', '#bible', '#god', '#jesus', '#christianity']
-    CheckQueue("Genesis", hashtags)
-    
-    finalVideo, title, text = CreateReel("Genesis", 95,"Cathedral_music.mp3", 0 )
+    finalVideo, title, text = CreateReel("Genesis", 95,"Cathedral_music.mp3", "Daniel")
 
-    input("Press Enter to Continue...")
 
+    input("Do you want to upload this video? press Enter")
     upload(finalVideo, title, text, hashtags)
 
-def CreateReel(Book, max_words, music, book_layout = 1):    
+    #christmasHashTags = ['#Christmas', '#MerryChristmas', '#ChristmasEve', '#ChristmasTree', '#HolidaySeason', '#SantaClaus', '#Xmas']
+    #finalVideo, title, text = CreateReel("Frosty", 95,"Frosty The Snowman (Instrumental).mp3", "1wg2wOjdEWKA7yQD8Kca")
+   # upload(finalVideo, title, text, christmasHashTags)
+
+
+
+def CreateReel(Book, max_words, music, voice):    
     #Book = "Genisis"
     chapter, start_line = log(Book)
     #max_words = 95
     max_chars_per_images = 399
-    if book_layout == 0:
-        print("using bible layout")
-        lines, lastLineNumber, nchapter = findHowManyLines(Book, chapter, start_line, max_words)
-    else:
-        lines, lastLineNumber, nchapter = findHowManyLinesBook(Book, chapter, start_line, max_words)
+    lines, lastLineNumber, nchapter = findHowManyLines(Book, chapter, start_line, max_words)
     text = " ".join(lines)
     num_lines = len(lines)
 
@@ -52,7 +52,7 @@ def CreateReel(Book, max_words, music, book_layout = 1):
         os.makedirs(audio_dir)
     audio_path = f"{audio_dir}/{title}.mp3"
     if not os.path.exists(audio_path):
-        audio = makeAudio(lines, audio_path, pause_length)
+        audio = makeAudio(lines, audio_path, pause_length, voice)
     else:
         audio = audio_path
         print("already exists, not generating new audio")
