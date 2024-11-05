@@ -48,7 +48,7 @@ def makeAudio(lines, output_path, pause_length):
     audio_paths = []
     for i, line in enumerate(lines):
         print(f"Processing line {i}: {line}")
-        audio_path = epensiveSpeak(line, f"Generated/Audio/Temp/temp{i}.mp3")
+        audio_path = epensiveSpeak(line, f"temp/temp{i}.mp3")
         print(f"Generated audio for line {i} at {audio_path}")
         audio_paths.append(AudioFileClip(audio_path))
         audio_paths.append(silence)

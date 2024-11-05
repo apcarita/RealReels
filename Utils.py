@@ -5,24 +5,26 @@ import os
 import pickle
 from openai import OpenAI
 
-def log():
+def log(book):
     current_time = datetime.datetime.now()
     # Reading
-    with open('Logs/Chapter.pkl', 'rb') as f:
+    print(f"loading logs for Logs/{book}/Chapter.pkl")
+    with open(f'Logs/{book}/Chapter.pkl', 'rb') as f:
         chapter = pickle.load(f)
     
-    with open('Logs/Part.pkl', 'rb') as f:
+    with open(f'Logs/{book}/Part.pkl', 'rb') as f:
         line = pickle.load(f) 
 
-    with open("Logs/log", "a") as log_file:
+    with open(f"Logs/{book}/log", "a") as log_file:
         print(f"Running at {current_time}... working on chapter: {chapter}:{line}")
-        log_file.write(f"Script ran at: {current_time} | Generating Genisis {chapter}:{line}\n")
+        log_file.write(f"Script ran at: {current_time} | Generating Genesis {chapter}:{line}\n")
+
+
     return chapter, line
 
 def findHowManyLines(book, chapter, line, max_words):
     lines, _ = getChapter(book, chapter)
     #print(f"Lines from chapter {chapter}:{line}")
-
     selected_lines = []
     total_words = 0
     total_chars = 0
@@ -59,18 +61,97 @@ def findHowManyLines(book, chapter, line, max_words):
 
     return selected_lines, last_line_number, nchapter
 
-def logComplete(chapter, startline, lastline, output_path):
+def findHowManyLinesBook(book, chapter, line, max_words):
+    lines, _ = getChapterBook(book, chapter)
+    #print(f"Lines from chapter {chapter}:{line}")
+    selected_lines = []
+    total_words = 0
+    total_chars = 0
+    last_line_number = line
+    nchapter = chapter
+    print(len(lines))
+    if(line >= len(lines)):
+        nchapter = chapter + 1
+        lines, _ = getChapterBook(book, nchapter)
+        line = 1
+        print("line does not exist; next chapter")
+    for i in range(line - 1, len(lines)):
+        words_in_line = len(lines[i].split())
+        chars_in_line = len(lines[i])
+        if (total_words + words_in_line > max_words) or (total_chars + chars_in_line > 900):
+            if not selected_lines:
+                selected_lines.append(lines[i])
+                last_line_number = i + 1
+            break
+        if(i >= len(lines)):
+            selected_lines.append(lines[i])
+            nchapter = chapter + 1
+            lines, _ = getChapterBook(book, nchapter)
+            i = 0
+            line = 1
+            break
+        print(f"adding line {i+1}: {lines[i]}")
+        selected_lines.append(lines[i])
+        total_words += words_in_line
+        total_chars += chars_in_line
+        last_line_number = i + 2
+
+        print("last Line number: ", last_line_number)
+
+    return selected_lines, last_line_number, nchapter
+
+
+def logComplete(book, chapter, text, startline, lastline, output_path):
      # Writing
     current_time = datetime.datetime.now()
+    title = f"{book} {chapter}:[{startline}-{lastline}]"
 
-    with open('Logs/Chapter.pkl', 'wb') as f:
+    with open(f'Logs/{book}/Chapter.pkl', 'wb') as f:
       pickle.dump(chapter, f)
-
-    with open('Logs/Part.pkl', 'wb') as f:
+    with open(f'Logs/{book}/Part.pkl', 'wb') as f:
       pickle.dump(lastline, f)
-    with open("Logs/log", "a") as log_file:
+    with open(f"Logs/{book}/log", "a") as log_file:
         print(f"Completing at {current_time}... {chapter}.{startline}-{lastline} saved to {output_path}")
         log_file.write(f"Completing at {current_time}... {chapter}.{startline}-{lastline} saved to {output_path}\n")
+
+    complete = []
+    with open(f'Logs/{book}/Upload_Queue.pkl', 'rb') as f:
+        complete = pickle.load(f) 
+    print(complete)
+
+    if(complete != []):
+        print("appending")
+        complete.append([title, text, output_path])
+    else:
+        complete = [title, text, output_path]
+        print(f"complete: {complete}")
+    with open(f'Logs/{book}/Upload_Queue.pkl', 'wb') as f:
+      pickle.dump(complete, f)
+
+def uploadQueue(book):
+    log_dir = f'Logs/{book}'
+    os.makedirs(log_dir, exist_ok=True)
+    file_path = os.path.join(log_dir, 'Upload_Queue.pkl')
+    
+    print(f"loading logs for {file_path}")
+    if not os.path.exists(file_path):
+        complete = []
+        with open(file_path, 'wb') as f:
+            pickle.dump(complete, f)
+    else:
+        try:
+            with open(file_path, 'rb') as f:
+                complete = pickle.load(f)
+        except EOFError:
+            complete = []
+    return complete
+
+def RemoveUploadQueue(book):
+    complete = []
+    with open(f'Logs/{book}/Upload_Queue.pkl', 'wb') as f:
+        pickle.dump(complete, f)
+    print(complete)
+
 
 def getChapter(book, chapter):
     lines = []
@@ -131,7 +212,7 @@ def describe(text):
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {   "role": "user",
-                "content": f"Describe the following bible verse in detail and order for an ai image generation model in LESS THAN 400 character or 50 words. get right into the description, avoid starting with an intro, and DO NOT INCLUDE NAKED PEOPLE, say they are covered in leaves. avoid names Adam and Eve {text}"}
+                "content": f"Describe the following bible verse in detail in LESS THAN 400 character or 50 words. get right into the description, avoid starting with an intro, and DO NOT INCLUDE NAKED PEOPLE, say they are covered in leaves. avoid names Adam and Eve {text}"}
         ]
     )
     description = completion.choices[0].message.content
@@ -140,18 +221,9 @@ def describe(text):
 
     return description
 if __name__ == "__main__":
-    #lines, _ = getChapter("genisis", 1)
-    #logComplete(2, 0, 4, "test.mp3")
+    RemoveUploadQueue("Genesis")
+    #print(getChapterBook("A Court Of Thorns.txt", 1))
 
-    with open('Logs/Chapter.pkl', 'rb') as f:
-        chapter = pickle.load(f)
-    
-    with open('Logs/Part.pkl', 'rb') as f:
-        line = pickle.load(f) 
-
-    print(getChapterBook("A Court Of Thorns.txt", 1))
-
-    #print(chapter, line)
 
     #text = findHowManyLines("Genisis", 2, 24, 100)
 

@@ -59,3 +59,5 @@ venv/
 
 *.json
 client_secrets.json
+Generated_Genesis
+Generated_Court
