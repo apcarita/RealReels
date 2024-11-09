@@ -181,14 +181,14 @@ def test():
     lines, lineNumber, nc = findHowManyLines(Book, chapter, start_line, max_words)
     logComplete(nc, start_line, lineNumber, "dsafasd")
 
-def describe(text):
+def describe(text, safty):
     client = OpenAI()
     completion = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {   "role": "user",
-                "content": f"breifly descripe the setting, and then secene in detail. When describing people alway describe thier outfit before them (ex: wearing a green dress, a women). Whenever somone is naked, say they are covered in before describing them. USE LESS THAN 400 characters {text}"}
+                "content": f"{safty} \n {text}"}
         ]
     )
     description = ' '.join(completion.choices[0].message.content.split()[:50])
@@ -200,12 +200,13 @@ if __name__ == "__main__":
     #RemoveUploadQueue("Genesis")
     #print(getChapterBook("Frosty", 1))
     book = "Genesis"
-    logComplete(book, 3,"sdad", 10, 13, "output_path")
+    logComplete(book, 3,"sdad", 10, 22, "output_path")
     #RemoveUploadQueue("Genesis")
 
 
-    text = findHowManyLines("Genesis", 13, 1, 95)
-
+    text = findHowManyLines("Genesis", 3, 22, 95)
+    print(text[0])
+    #describe(text[0])
     #print(describe(" Once upon a snowy morning in the cozy town of Evergreen Hills, a group of children rushed outside, eager to build their annual snowman. The air was crisp, and the ground was blanketed with fresh, powdery snow—the perfect day for snowman building. The children worked together, rolling the snow into three large, round balls, stacking them one on top of the other. Soon, they had built a snowman that was the envy of the neighborhood. They named him Frosty, and he had a carrot nose, coal eyes, and a big, friendly smile. "))
    # describe(text)
 

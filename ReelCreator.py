@@ -13,6 +13,7 @@ max_chars_per_line = 80
 
 def main():
     hashtags = ['#faith', '#religion', '#spirituality', '#bible', '#god', '#jesus', '#christianity']
+    #CheckQueue("Genesis", hashtags)
     finalVideo, title, text = CreateReel("Genesis", 95,"Cathedral_music.mp3", "Daniel")
 
 
@@ -37,12 +38,23 @@ def CreateReel(Book, max_words, music, voice):
     print(f"Text: \n \n {text} \n \n")
     
     title = f"{Book} {nchapter}:[{start_line}-{lastLineNumber}]"
-    #images = testimages()
+    #images = testimages()  
+    safty = "Using less than 400 characters, describe the following text as a picture in less than 400 characters. for example:\n \" And the LORD said unto Cain, Where is Abel thy brother? And he said, I know not: Am I my brother's keeper? And he said, What hast thou done? the voice of thy brother's blood crieth unto me from the ground. And now art thou cursed from the earth, which hath opened her mouth to receive thy brother's blood from thy hand; : When thou tillest the ground, it shall not henceforth yield unto thee her strength; a fugitive and a vagabond shalt thou be in the earth. \n \" turns into: \n  \"a man stands alone in a desolate wasteland, with bood on his hands. a large authoritative figure stands above him, judging. His soul floats above his body in a stream of light as the being towering above him passes judgement.\" Mentaion people  Replace all nudity with something more apporiate (cover with leave ect.) Respond with only your description:"
+
+
+
+    safty2 = "remove all the non-descirptive words, and make it more concise. Replace any nudity in the text with something more appropriate (cover with leaves ect.) and make sure the text describes what people are wearing before describing them (also remove the names Adam and Eve). Respond only with the revised text:"
+
+    superSafty = "start by breifly describe the setting in a Family Friendly way. Avoid any describing characteristics that could alude to women (don't say lush and devine without first specifing what is lush and devine). then events and characters. When describing people alway describe thier outfit before them (ex: wearing a green dress, a women). Whenever somone is naked, say they are covered in before describing them. USE LESS THAN 400 characters"
 
     image_dir = f"Generated_{Book}/images/{title}"
     if not os.path.exists(image_dir):
         os.makedirs(image_dir)
-        images = uc.loop().run_until_complete(fetchArt(describe(text), 7, image_dir))
+        images = uc.loop().run_until_complete(fetchArt(describe(text, safty), 7, image_dir))
+        if images is None:
+            print("NSFW Content Detected... Fetchign new images w/ safer prompt") 
+            images = uc.loop().run_until_complete(fetchArt(describe(text, superSafty), 7, image_dir))
+            return
     else: 
         images = [f"{image_dir}/{i}" for i in os.listdir(image_dir)]
         print("images already exist, not fetching new images")
@@ -83,17 +95,13 @@ def upload(finalVideo, title, text, hashtags):
     print("Posting to YT shorts...")
     setPost()
     print(f"uploading {finalVideo} to YT shorts")
-    try:
-        postYT(finalVideo, title, " ".join(hashtags) + " " + text)
-        print(f"{finalVideo} published to YT shorts")
-    except: 
-        print("video could not be uploated to YT shorts, check quota and try again tomorrow")
+    postYT(finalVideo, title, " ".join(hashtags) + " " + text)
+    print(f"{finalVideo} published to YT shorts")
+        #print("video could not be uploated to YT shorts, check quota and try again tomorrow")
     print("Posting to TikTok...")
-    try:
        # upload_tiktok(finalVideo, description=text, accountname="scrolls_for_jesus", hashtags=hashtags)
-        print(f"{finalVideo} published to TikTok")
-    except: 
-        print("viedo could not be uploated to TikTok")
+    print(f"{finalVideo} published to TikTok") 
+    print("viedo could not be uploated to TikTok")
     RemoveUploadQueue("Genesis")
 
     

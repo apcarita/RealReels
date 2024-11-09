@@ -48,10 +48,13 @@ async def fetchArt(line, chars_per_line, output_path):
                 return
             await driver.sleep(1)  # Wait before retrying
 
+    loginIcon = await tab.select("body > div:nth-child(2) > main > div > div.fixed.w-full.h-\[56px\].lg\:h-\[40px\].pr-3.lg\:px-4.z-\[51\].justify-between.items-center.inline-flex.my-\[10px\] > div.flex.items-center.justify-between.h-full.w-full > div.flex.shrink-0.sm\:gap-3.gap-0\.5.justify-end.items-center.w-40 > a > button")
 
-    if not await load_cookies(driver, tab):
+    if not await load_cookies(driver, tab) or loginIcon.text == "Sign Up":
         print("Please log in manually.")
-        await tab.sleep(30)  # Give the user 60 seconds to log in manually
+        await tab.sleep(40)  # Give the user 60 seconds to log in manually
+
+        tab = await driver.get("https://www.krea.ai/apps/image/realtime")
         await save_cookies(driver)
         print("Cookeis Saved!")
     else:
@@ -78,7 +81,7 @@ async def fetchArt(line, chars_per_line, output_path):
     await tab.scroll_down(20)
     image_count = 1
     for i in range(0, len(text), chars_per_line):
-        if(i <= 1):
+        if(i <= 2):
             snippet = text[i:i+chars_per_line]
             await text_area.send_keys(snippet)
             await tab.sleep(2)
@@ -93,9 +96,10 @@ async def fetchArt(line, chars_per_line, output_path):
         print(f"typing: {snippet}... Saving to: {path}")
         await image_area.save_screenshot(path)
         #await tab.download_file(img_url, path)
-        if(image_count <= 3):
+        if(image_count <= 3 or image_count == 10 or image_count == 15):
             if(detect_safe_search(path) ):
-                return 0
+                os.rmdir(output_path)
+                return None
         images.append(path)
         image_count += 1
     # Move all the image files from downloads to output_path
@@ -150,7 +154,7 @@ async def login():
     driver = await uc.start()
     tab = await driver.get("https://www.krea.ai/apps/image/realtime")
     print("Please log in manually.")
-    await tab.sleep(40)  # Give the user 60 seconds to log in manually
+    await tab.sleep(65)  # Give the user 60 seconds to log in manually
     await save_cookies(driver)
     print("Cookeis Saved!")
     
