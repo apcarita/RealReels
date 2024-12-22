@@ -37,7 +37,7 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 #   https://developers.google.com/youtube/v3/guides/authentication
 # For more information about the client_secrets.json file format, see:
 #   https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-CLIENT_SECRETS_FILE = "client_secrets.json"
+CLIENT_SECRETS_FILE = "client_secret_210743357668-o22btqr4ajqgf78d69hrk2tain9qq1av.apps.googleusercontent.com(1).json"
 
 # This OAuth 2.0 access scope allows an application to upload files to the
 # authenticated user's YouTube channel, but doesn't allow other types of access.
@@ -65,6 +65,12 @@ https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 
 VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
+argparser.add_argument("--file", required=True, help="Video file to upload")
+argparser.add_argument("--title", help="Video title", default="Test Title")
+argparser.add_argument("--description", help="Video description", default="Test Description")
+argparser.add_argument("--category", default="22", help="Numeric video category.")
+argparser.add_argument("--keywords", help="Video keywords, comma separated", default="")
+argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES, default=VALID_PRIVACY_STATUSES[0], help="Video privacy status.")
 
 def Wget_authenticated_service(args):
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE,
@@ -156,29 +162,20 @@ def resumable_upload(insert_request):
             sleep_seconds = random.random() * max_sleep
             print("Sleeping %f seconds and then retrying..." % sleep_seconds)
             time.sleep(sleep_seconds)
-def setPost():
-    argparser.add_argument("--file", required=True, help="Video file to upload")
-    argparser.add_argument("--title", help="Video title", default="Test Title")
-    argparser.add_argument("--description", help="Video description",
-                           default="Test Description")
-    argparser.add_argument("--category", default="22",
-                           help="Numeric video category. " +
-                           "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
-    argparser.add_argument("--keywords", help="Video keywords, comma separated",
-                           default="")
-    argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,
-                           default=VALID_PRIVACY_STATUSES[0], help="Video privacy status.")
 
-def postYT(filePath1, titleOfVid, descriptionVid, hashtags, category="22", privacyStatus="public"):
-    keywords = [hashtag[1:] for hashtag in hashtags]
+def setPost():
+    pass  # Remove or leave empty if not needed
+
+def postYT(filePath1, titleOfVid, descriptionVid):
+
     sys.argv = [
         'script_name',  # Usually the script name is the first argument, so keep it as a placeholder
         '--file', filePath1,
         '--title', titleOfVid,
         '--description', descriptionVid,
-        '--category', category,
-        '--keywords', keywords,
-        '--privacyStatus', privacyStatus
+        '--category', '22',
+        '--keywords', 'bible, God, Jesus, faith, scripture, Christianity, religion, spirituality',
+        '--privacyStatus', 'public'
     ]
     args = argparser.parse_args()
 
@@ -189,50 +186,18 @@ def postYT(filePath1, titleOfVid, descriptionVid, hashtags, category="22", priva
         print("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
 
 
-"""
-
-def postYT(file_path, title, description, keywords="", category="22", privacyStatus="public"):
-    tags = keywords.split(",") if keywords else None
-
-    body = dict(
-        snippet=dict(
-            title=title,
-            description=description,
-            tags=tags,
-            categoryId=category
-        ),
-        status=dict(
-            privacyStatus=privacyStatus
-        )
-    )
-
-    youtube = Wget_authenticated_service()
-    try:
-        initialize_upload(youtube, body, file_path)
-    except HttpError as e:
-        print(f"An HTTP error {e.resp.status} occurred:\n{e.content}")
-"""
-
-
 if __name__ == '__main__':
-    import argparse
+    print("Posting to YT shorts...")
+    path = "/Users/adam/Documents/COde/RelReels/Generated/Final/Genisis 1:[31-34].mp4"
+    text = "2:1 Thus the heavens and the earth were finished, and all the host of them.2:2 And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.2:3 And God blessed the seventh day, and sanctified it: because that in it he had rested from all his work which God created and made"
+    setPost()
+   #postYT(path, "Genisis 2[1-3]", text)
+    print(f"{path} published to YT shorts") 
+    print("Posting to TikTok...")
+    try:
+        upload_tiktok(path, description=text, accountname="scrolls_for_jesus", hashtags=['#bible', '#God', '#Jesus', '#faith', '#scripture', '#Christianity', '#religion', '#spirituality'])
+        print(f"{path} published to TikTok")
+    except: 
+        print("viedo could not be uploated to TikTok")
 
-    argparser.add_argument("--file", required=True, help="Video file to upload")
-    argparser.add_argument("--title", required=True, help="Video title")
-    argparser.add_argument("--description", required=True, help="Video description")
-    argparser.add_argument("--keywords", help="Video keywords, comma separated", default="")
-    argparser.add_argument("--category", default="22",
-                           help="Numeric video category. "
-                                "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
-    argparser.add_argument("--privacyStatus", choices=VALID_PRIVACY_STATUSES,
-                           default="public", help="Video privacy status.")
-    args = argparser.parse_args()
 
-    postYT(
-        file_path=args.file,
-        title=args.title,
-        description=args.description,
-        keywords=args.keywords,
-        category=args.category,
-        privacyStatus=args.privacyStatus
-    )

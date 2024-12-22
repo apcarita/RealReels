@@ -19,7 +19,7 @@ def log(book):
         with open(f'Logs/{book}/Part.pkl', 'wb') as f:
             pickle.dump(1, f)
         with open(f'Logs/{book}Upload_Queue.pkl', 'wb') as f:
-            pickle.dump(1, f)
+            pickle.dump([], f)
     with open(f'Logs/{book}/Chapter.pkl', 'rb') as f:
         chapter = pickle.load(f)
     
@@ -103,6 +103,13 @@ def logComplete(book, chapter, text, startline, lastline, output_path):
         print(f"complete: {complete}")
     with open(f'Logs/{book}/Upload_Queue.pkl', 'wb') as f:
       pickle.dump(complete, f)
+def setLine(book, chapter, line):
+    with open(f'Logs/{book}/Chapter.pkl', 'wb') as f:
+      pickle.dump(chapter, f)
+    with open(f'Logs/{book}/Part.pkl', 'wb') as f:
+      pickle.dump(line, f)
+    print(f"setting line to {chapter}:{line}")
+
 
 def uploadQueue(book):
     log_dir = f'Logs/{book}'
@@ -199,10 +206,14 @@ def describe(text, safty):
 if __name__ == "__main__":
     #RemoveUploadQueue("Genesis")
     #print(getChapterBook("Frosty", 1))
-    book = "Genesis"
-    logComplete(book, 3,"sdad", 10, 22, "output_path")
-    #RemoveUploadQueue("Genesis")
 
+    RemoveUploadQueue("Genesis")
+    book = "Frosty"
+    #setLine(book, 1, 1)
+    #logComplete(book, 7,"sdad", 0, 25, "output_path")
+    #RemoveUploadQueue("Genesis")
+    with open(f'Logs/{book}Upload_Queue.pkl', 'wb') as f:
+            pickle.dump([], f)
 
     text = findHowManyLines("Genesis", 3, 22, 95)
     print(text[0])

@@ -7,11 +7,9 @@ import moviepy.video.fx.all as vfx
 import moviepy.video.fx.crop as crop_vid
 from moviepy.editor import TextClip, CompositeVideoClip
 import pysrt
-from ReelCreator import pause_length, max_chars_per_line
 
 # Take in audio and an array of images (paths) and then stitch them all together to create 1 video
-def stitch(audio_path, images, output_path, number_of_lines, background_music):
-    global pause_length
+def stitch(audio_path, images, output_path, number_of_lines, background_music, pause_length):
     # Sort images to ensure they are in order
     images.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split('_')[-1]))
 
@@ -40,8 +38,7 @@ def stitch(audio_path, images, output_path, number_of_lines, background_music):
 
     return output_path
 # Take in video, and SRT then save a video with subtitels added to outputpath
-def addSubtitles(video_path, srt_path, output_path):
-    global max_chars_per_line
+def addSubtitles(video_path, srt_path, output_path, max_chars_per_line):
     video = VideoFileClip(video_path)
     subtitles = pysrt.open(srt_path)
     subtitle_clips = []
@@ -57,13 +54,13 @@ def addSubtitles(video_path, srt_path, output_path):
         if len(line) > max_chars_per_line or line == "":
             line = "\"" + subtitle.text
         
-        if(len(line) > 12):
+        if(len(line) > 3):
             add = "\""
         else: add = ""
         font = 'October-Condensed-Devanagari-Heavy'
         font = 'Big-Caslon-Medium'
         next_start_time = subtitles[subtitles.index(subtitle) + 1].start.hours * 3600 + subtitles[subtitles.index(subtitle) + 1].start.minutes * 60 + subtitles[subtitles.index(subtitle) + 1].start.seconds + subtitles[subtitles.index(subtitle) + 1].start.milliseconds / 1000 if subtitles.index(subtitle) + 1 < len(subtitles) else video.duration
-        text_clip = TextClip(line + add, fontsize=90, font='Big-Caslon-Medium', color='White', bg_color='none', size=(video.size[0]*10/12, video.size[1]*2/6), method='caption', align='north')
+        text_clip = TextClip(line + add, fontsize=88, font='Big-Caslon-Medium', color='White', bg_color='none', size=(video.size[0]*11/12, video.size[1]*2/6), method='caption', align='north')
         text_clip = text_clip.set_start(start_time).set_duration(next_start_time - start_time)
 
         print(f"adding subtitle {line} {last_end_time} to {next_start_time}")

@@ -2,31 +2,32 @@ from Utils import *
 from TTS import *
 from VideoUtils import *
 import nodriver as uc
+import time
 from KreaArt import fetchArt
 import os
-from postVid import postYT, setPost
+from PostVid1 import postYT, setPost
 from TikTokUploader import upload_tiktok
+import argparse
 
-
-pause_length = 0.5
-max_chars_per_line = 80
 
 def main():
-    hashtags = ['#faith', '#religion', '#spirituality', '#bible', '#god', '#jesus', '#christianity']
-    #CheckQueue("Genesis", hashtags)
-    finalVideo, title, text = CreateReel("Genesis", 95,"Cathedral_music.mp3", "Daniel")
-
-
-    input("Do you want to upload this video? press Enter")
-    upload(finalVideo, title, text, hashtags)
+    print("s")
+    
 
     #christmasHashTags = ['#Christmas', '#MerryChristmas', '#ChristmasEve', '#ChristmasTree', '#HolidaySeason', '#SantaClaus', '#Xmas']
-    #finalVideo, title, text = CreateReel("Frosty", 95,"Frosty The Snowman (Instrumental).mp3", "1wg2wOjdEWKA7yQD8Kca")
+    #finalVideo, title, text = CreateReel("cartoon: ", "Frosty", 95,"Frosty The Snowman (Instrumental).mp3", "1wg2wOjdEWKA7yQD8Kca")
    # upload(finalVideo, title, text, christmasHashTags)
+    hashtags = ['#faith', '#religion', '#spirituality', '#bible', '#god', '#jesus', '#christianity']
+    #CheckQueue("Genesis", hashtags)
+    CheckQueue("Genesis", hashtags)
+    finalVideo, title, text = CreateReel("", "Genesis", 95,"Cathedral_music.mp3", "Daniel")
+    upload(finalVideo, title, text, hashtags)
 
 
+def CreateReel(prefix, Book, max_words, music, voice):    
+    pause_length = 0.5
+    max_chars_per_line = 80
 
-def CreateReel(Book, max_words, music, voice):    
     #Book = "Genisis"
     chapter, start_line = log(Book)
     #max_words = 95
@@ -40,7 +41,7 @@ def CreateReel(Book, max_words, music, voice):
     title = f"{Book} {nchapter}:[{start_line}-{lastLineNumber}]"
     #images = testimages()  
     safty = "Using less than 400 characters, describe the following text as a picture in less than 400 characters. for example:\n \" And the LORD said unto Cain, Where is Abel thy brother? And he said, I know not: Am I my brother's keeper? And he said, What hast thou done? the voice of thy brother's blood crieth unto me from the ground. And now art thou cursed from the earth, which hath opened her mouth to receive thy brother's blood from thy hand; : When thou tillest the ground, it shall not henceforth yield unto thee her strength; a fugitive and a vagabond shalt thou be in the earth. \n \" turns into: \n  \"a man stands alone in a desolate wasteland, with bood on his hands. a large authoritative figure stands above him, judging. His soul floats above his body in a stream of light as the being towering above him passes judgement.\" Mentaion people  Replace all nudity with something more apporiate (cover with leave ect.) Respond with only your description:"
-
+    noFilter = "Replace any nudity in the text with something more appropriate (cover with leaves ect.) and make sure the text describes what people are wearing before describing them (also remove the names Adam and Eve). Respond only with the revised text (if the text is already good, just reply with the text):"
 
 
     safty2 = "remove all the non-descirptive words, and make it more concise. Replace any nudity in the text with something more appropriate (cover with leaves ect.) and make sure the text describes what people are wearing before describing them (also remove the names Adam and Eve). Respond only with the revised text:"
@@ -50,14 +51,12 @@ def CreateReel(Book, max_words, music, voice):
     image_dir = f"Generated_{Book}/images/{title}"
     if not os.path.exists(image_dir):
         os.makedirs(image_dir)
-        images = uc.loop().run_until_complete(fetchArt(describe(text, safty), 7, image_dir))
-        if images is None:
-            print("NSFW Content Detected... Fetchign new images w/ safer prompt") 
-            images = uc.loop().run_until_complete(fetchArt(describe(text, superSafty), 7, image_dir))
-            return
-    else: 
-        images = [f"{image_dir}/{i}" for i in os.listdir(image_dir)]
-        print("images already exist, not fetching new images")
+
+    images = uc.loop().run_until_complete(fetchArt(prefix + describe(text, noFilter), 7, image_dir))
+    if images is None:
+        print("NSFW Content Detected... Fetchign new images w/ safer prompt") 
+        images = uc.loop().run_until_complete(fetchArt(prefix + describe(text, superSafty), 7, image_dir))
+        return
 
     audio_dir = f"Generated_{Book}/Audio/Complete"
     if not os.path.exists(audio_dir):
@@ -78,13 +77,15 @@ def CreateReel(Book, max_words, music, voice):
     intermediate_dir = f"Generated_{Book}/Intermediate"
     if not os.path.exists(intermediate_dir):
         os.makedirs(intermediate_dir)
-    planeVideo = stitch(audio, images, f"{intermediate_dir}/{title}.mp4", num_lines, music)
+    planeVideo = stitch(audio, images, f"{intermediate_dir}/{title}.mp4", num_lines, music, pause_length)
     print(f"stitched video and saved to: {planeVideo}")
 
     final_dir = f"Generated_{Book}/Final"
     if not os.path.exists(final_dir):
         os.makedirs(final_dir)
-    finalVideo = addSubtitles(planeVideo, srt, f"{final_dir}/{title}.mp4")
+    finalVideo = addSubtitles(planeVideo, srt, f"{final_dir}/{title}.mp4", max_chars_per_line)
+
+    title = f"{Book} the Snow Man part {start_line}-{lastLineNumber}"
     #finalVideo = addSubtitles(srt, f"Generated/Final/{title}.mp4")
     # def logComplete(book, chapter, text, startline, lastline, output_path):
     logComplete(Book, nchapter, text, start_line, lastLineNumber, finalVideo)
@@ -93,9 +94,21 @@ def CreateReel(Book, max_words, music, voice):
 
 def upload(finalVideo, title, text, hashtags):
     print("Posting to YT shorts...")
-    setPost()
     print(f"uploading {finalVideo} to YT shorts")
-    postYT(finalVideo, title, " ".join(hashtags) + " " + text)
+    postYT(finalVideo, title, text)
+    print(f"{finalVideo} published to YT shorts")
+        #print("video could not be uploated to YT shorts, check quota and try again tomorrow")
+    print("Posting to TikTok...")
+       # upload_tiktok(finalVideo, description=text, accountname="scrolls_for_jesus", hashtags=hashtags)
+    print(f"{finalVideo} published to TikTok") 
+    print("viedo could not be uploated to TikTok")
+    RemoveUploadQueue("Genesis")
+
+def sneekyUpload(finalVideo, title, text, hashtags):
+    print("Posting to YT shorts...")
+    print(f"uploading {finalVideo} to YT shorts")
+    setPost()
+    postYT(finalVideo, title, text)
     print(f"{finalVideo} published to YT shorts")
         #print("video could not be uploated to YT shorts, check quota and try again tomorrow")
     print("Posting to TikTok...")
