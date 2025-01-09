@@ -60,7 +60,7 @@ def addSubtitles(video_path, srt_path, output_path, max_chars_per_line):
         font = 'October-Condensed-Devanagari-Heavy'
         font = 'Big-Caslon-Medium'
         next_start_time = subtitles[subtitles.index(subtitle) + 1].start.hours * 3600 + subtitles[subtitles.index(subtitle) + 1].start.minutes * 60 + subtitles[subtitles.index(subtitle) + 1].start.seconds + subtitles[subtitles.index(subtitle) + 1].start.milliseconds / 1000 if subtitles.index(subtitle) + 1 < len(subtitles) else video.duration
-        text_clip = TextClip(line + add, fontsize=88, font='Big-Caslon-Medium', color='White', bg_color='none', size=(video.size[0]*11/12, video.size[1]*2/6), method='caption', align='north')
+        text_clip = TextClip(line + add, fontsize=60, font='Big-Caslon-Medium', color='White', bg_color='none', size=(video.size[0]*11/12, video.size[1]*1/2), method='caption', align='north')
         text_clip = text_clip.set_start(start_time).set_duration(next_start_time - start_time)
 
         print(f"adding subtitle {line} {last_end_time} to {next_start_time}")

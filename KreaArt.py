@@ -27,24 +27,28 @@ COOKIE_FILE_NAME = ".session.dat"
 async def fetchArt(line, chars_per_line, output_path):
     words = line.split(' ')
     driver = await uc.start()
-    retries = 5
-    for attempt in range(retries):
-        try:
-            tab = await driver.get("https://www.krea.ai/apps/image/realtime")
-            await tab.sleep(1)
-            # Check if the page loaded correctly by looking for a specific element
-            if await tab.select("button.px-3:nth-child(2)"):
-                print("Page loaded successfully.")
-                break
-        except Exception as e:
-            print(f"Attempt {attempt + 1} failed: {e}")
-            if attempt == retries - 1:
-                print("Failed to load the page after multiple attempts.")
-                return
-            await driver.sleep(1)  # Wait before retrying
+    await asyncio.sleep(0.5)
+    retries = 3
+    tab = await driver.get("https://www.krea.ai/apps/image/realtime")
 
-    loginIcon = await tab.select("body > div:nth-child(2) > main > div > div.fixed.w-full.h-\[56px\].lg\:h-\[40px\].pr-3.lg\:px-4.z-\[51\].justify-between.items-center.inline-flex.my-\[10px\] > div.flex.items-center.justify-between.h-full.w-full > div.flex.shrink-0.sm\:gap-3.gap-0\.5.justify-end.items-center.w-40 > a > button")
-    print(loginIcon.attributes)
+    while retries > 0:
+        await tab.wait()
+        print(tab.target.url)
+        if tab.target.url != 'https://www.krea.ai/apps/image/realtime':
+            tab = await driver.get("https://www.krea.ai/apps/image/realtime")
+            await tab.wait(0.5)
+        else:
+            retries = -1
+            break
+        retries -= 1  
+        if(retries == 0):
+            driver = await uc.start()
+            retries = 3 
+            print("New Driver Started!")       
+        print("Retrying... Attmept: ", 12- retries)
+    print("Signing in...")
+    await tab.set_window_size(0, 0, 1928, 1317)
+
     
     if not await load_cookies(driver, tab) or "hi" == "Sign Up":
         print("Please log in manually.")
@@ -74,9 +78,11 @@ async def fetchArt(line, chars_per_line, output_path):
     images = []
     
     text = ' '.join(words)
-    pretext = text[:20]
-    text = text[20:]
+    pretext = text[:35]
+    text = text[35:]
     await tab.scroll_down(20)
+    #await tab.scroll_down(30)
+
     image_count = 1
 
     await text_area.send_keys(pretext)
@@ -93,9 +99,9 @@ async def fetchArt(line, chars_per_line, output_path):
         print(f"typing: {snippet}... Saving to: {path}")
         await image_area.save_screenshot(path)
         #await tab.download_file(img_url, path)
-        if(image_count == 3 or image_count == 10 or image_count == 15):
+        if(image_count == 1 or image_count == 2 or image_count == 3 or image_count == 4 or image_count == 10 or image_count == 15):
             if(detect_safe_search(path) ):
-                os.rmdir(output_path)
+                raise ValueError("NSFW content detected. Aborting.")
                 return None
         images.append(path)
         image_count += 1
@@ -158,6 +164,6 @@ async def login():
     
 
 if __name__ == "__main__":
-    uc.loop().run_until_complete(login())
+   uc.loop().run_until_complete(login())
 
 

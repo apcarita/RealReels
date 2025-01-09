@@ -207,23 +207,12 @@ if __name__ == "__main__":
     #RemoveUploadQueue("Genesis")
     #print(getChapterBook("Frosty", 1))
 
-    RemoveUploadQueue("Genesis")
-    book = "Frosty"
-    #setLine(book, 1, 1)
+    #RemoveUploadQueue("Genesis")
+    book = "Genesis"
+    #set to 20,4
+    setLine(book, 20, 4)
     #logComplete(book, 7,"sdad", 0, 25, "output_path")
     #RemoveUploadQueue("Genesis")
-    with open(f'Logs/{book}Upload_Queue.pkl', 'wb') as f:
-            pickle.dump([], f)
+    #with open(f'Logs/{book}Upload_Queue.pkl', 'wb') as f:
+           # pickle.dump([], f)
 
-    text = findHowManyLines("Genesis", 3, 22, 95)
-    print(text[0])
-    #describe(text[0])
-    #print(describe(" Once upon a snowy morning in the cozy town of Evergreen Hills, a group of children rushed outside, eager to build their annual snowman. The air was crisp, and the ground was blanketed with fresh, powdery snow—the perfect day for snowman building. The children worked together, rolling the snow into three large, round balls, stacking them one on top of the other. Soon, they had built a snowman that was the envy of the neighborhood. They named him Frosty, and he had a carrot nose, coal eyes, and a big, friendly smile. "))
-   # describe(text)
-
-    #test()
-    #describe(findHowManyLines("Genisis", 1, 1, 100)[0])
-
-    
-    #log()
-    #print(getLines("Genisis", 1, [1, 2, 3, 4, 5]))
